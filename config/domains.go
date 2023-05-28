@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"strings"
@@ -19,6 +20,7 @@ type Domains struct {
 	Ipv6Addr    string
 	Ipv6Cache   *util.IpCache
 	Ipv6Domains []*Domain
+	Msg 			 string
 }
 
 // Domain 域名实体
@@ -81,7 +83,8 @@ func (domains *Domains) GetNewIp(dnsConf *DnsConfig) {
 			if domains.Ipv4Cache.TimesFailedIP == 3 {
 				domains.Ipv4Domains[0].UpdateStatus = UpdatedFailed
 			}
-			log.Println("未能获取IPv4地址, 将不会更新")
+			domains.Msg = "未能获取IPv4地址, 将不会更新"
+			log.Println(domains.Msg)
 		}
 	}
 
@@ -97,7 +100,8 @@ func (domains *Domains) GetNewIp(dnsConf *DnsConfig) {
 			if domains.Ipv6Cache.TimesFailedIP == 3 {
 				domains.Ipv6Domains[0].UpdateStatus = UpdatedFailed
 			}
-			log.Println("未能获取IPv6地址, 将不会更新")
+			domains.Msg = "未能获取IPv6地址, 将不会更新"
+			log.Println(domains.Msg)
 		}
 	}
 
@@ -172,7 +176,8 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 		if domains.Ipv6Cache.Check(domains.Ipv6Addr) {
 			return domains.Ipv6Addr, domains.Ipv6Domains
 		} else {
-			log.Printf("IPv6未改变，将等待 %d 次后与DNS服务商进行比对\n", domains.Ipv6Cache.Times)
+			domains.Msg = fmt.Sprintf("IPv6未改变，将等待 %d 次后与DNS服务商进行比对", domains.Ipv6Cache.Times)
+			log.Printf(domains.Msg)
 			return "", domains.Ipv6Domains
 		}
 	}
@@ -180,7 +185,8 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 	if domains.Ipv4Cache.Check(domains.Ipv4Addr) {
 		return domains.Ipv4Addr, domains.Ipv4Domains
 	} else {
-		log.Printf("IPv4未改变，将等待 %d 次后与DNS服务商进行比对\n", domains.Ipv4Cache.Times)
+		domains.Msg = fmt.Sprintf("IPv4未改变，将等待 %d 次后与DNS服务商进行比对", domains.Ipv4Cache.Times)
+		log.Printf(domains.Msg)
 		return "", domains.Ipv4Domains
 	}
 }
